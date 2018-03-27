@@ -313,7 +313,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 
 #best fit curves, MLE parameter table, R2, discussion.
-png(graph.png)
+png(filename="graph.png", width=1000, height=600)
 multiplot(p1, p2, cols=2)
 dev.off()
 
