@@ -311,11 +311,26 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   }
 }
 
+
+#best fit curves, MLE parameter table, R2, discussion.
+png(graph.png)
 multiplot(p1, p2, cols=2)
+dev.off()
+
 v1 <- c("par1", "par2", "par3")
 v2 <- names
 v3 <- c("MLE", "LSE")
 pars <- array(NA, c(3,ncol(pars_mle),2), dimnames=list(v1, v2, v3));
   pars[,,1]<-pars_mle
   pars[,,2]<-pars_lse
+pars
 
+r2 <- array(NA, c(1,ncol(pars_mle),2), dimnames=list(c("r2"),v2,v3))
+  r2[,,1] <- r2_mle
+  r2[,,2] <- r2_lse
+r2
+
+##discussion
+#MLE and LSE do not differ a lot in this case. The reason would be (Myung's paper).
+#In any estimation, the best fitting models are POW2 and EXPOW. Their fits almost overlapp.
+#Also, POW1 and POW2 do not show any big differnece. This is because the estimated parameter of POW2, which has a multiplicative effect on the power function, is almost 1, not having any big influence on the POW2
