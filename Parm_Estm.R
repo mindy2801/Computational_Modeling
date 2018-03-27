@@ -100,7 +100,7 @@ p_prd_pow1 <- (1+int)^(-parm_pow1[1])
 p_prd_pow2 <- parm_pow2[1]*(t_int+1)^(-parm_pow2[2])
 p_prd_exp1 <- exp((-parm_exp1[1])*int)
 p_prd_exp2 <- parm_exp2[1]*exp(-parm_exp2[2]*t_int)
-p_prd_expow <- parm_expow[1]*exp((-parm_expow[2])*int)*(1+int)^(parm_expow[3])
+p_prd_expow <- parm_expow[1]*exp((-parm_expow[2])*int)*(1+int)^(-parm_expow[3])
 p_prd_hyp1 <- 1/(1+parm_hyp1[1]*int)
 p_prd_hyp2 <- parm_hyp2[1]/(1+parm_hyp2[2]*int)
 
@@ -127,14 +127,14 @@ dimnames(pars_mle) = list(c('par1', 'par2', 'par3'),c('POW1', 'POW2', 'EXP1', 'E
 
 mle_summary = data.frame(Models = names, loglik = - minus_loglik_MLE, r2 = r2_mle)
 
-# Plot the MLE results using simple R graphics. Use ggplots for fancy graphs
+# Plot the MLE results
 x <- seq(0,20, 0.05)
 
 p_pow1 <- (1+x)^(-parm_pow1[1])
 p_pow2 <- parm_pow2[1]*(x+1)^(-parm_pow2[2])
 p_exp1 <- exp((-parm_exp1[1])*x)
 p_exp2 <- parm_exp2[1]*exp(-parm_exp2[2]*x)
-p_expow <- parm_expow[1]*exp((-parm_expow[2])*x)*(1+x)^(parm_expow[3])
+p_expow <- parm_expow[1]*exp((-parm_expow[2])*x)*(1+x)^(-parm_expow[3])
 p_hyp1 <- 1/(1+parm_hyp1[1]*x)
 p_hyp2 <- parm_hyp2[1]/(1+parm_hyp2[2]*x)
 graph_p <- data.frame(x, p_pow1, p_pow2, p_exp1, p_exp2, p_expow, p_hyp1, p_hyp2)
@@ -218,7 +218,7 @@ lse_p_prd_pow1 <- (1+int)^(-lse_parm_pow1[1])
 lse_p_prd_pow2 <- lse_parm_pow2[1]*(t_int+1)^(-lse_parm_pow2[2])
 lse_p_prd_exp1 <- exp((-lse_parm_exp1[1])*int)
 lse_p_prd_exp2 <- lse_parm_exp2[1]*exp(-lse_parm_exp2[2]*t_int)
-lse_p_prd_expow <- lse_parm_expow[1]*exp((-lse_parm_expow[2])*int)*(1+int)^(lse_parm_expow[3])
+lse_p_prd_expow <- lse_parm_expow[1]*exp((-lse_parm_expow[2])*int)*(1+int)^(-lse_parm_expow[3])
 lse_p_prd_hyp1 <- 1/(1+lse_parm_hyp1[1]*int)
 lse_p_prd_hyp2 <- lse_parm_hyp2[1]/(1+lse_parm_hyp2[2]*int)
 
@@ -274,7 +274,7 @@ print(pars_lse,4)
 
 
 
-##multiplot function by Cookbook for R
+##multiplot function by "Cookbook for R"
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
 
@@ -317,20 +317,14 @@ png(filename="graph.png", width=1000, height=600)
 multiplot(p1, p2, cols=2)
 dev.off()
 
-v1 <- c("par1", "par2", "par3")
-v2 <- names
-v3 <- c("MLE", "LSE")
-pars <- array(NA, c(3,ncol(pars_mle),2), dimnames=list(v1, v2, v3));
+
+pars <- array(NA, c(3,ncol(pars_mle),2), dimnames=list(c("par1", "par2", "par3"), names, c("MLE","LSE")));
   pars[,,1]<-pars_mle
   pars[,,2]<-pars_lse
 pars
 
-r2 <- array(NA, c(1,ncol(pars_mle),2), dimnames=list(c("r2"),v2,v3))
+r2 <- array(NA, c(1,ncol(pars_mle),2), dimnames=list(c("r2"),names,c("MLE","LSE")))
   r2[,,1] <- r2_mle
   r2[,,2] <- r2_lse
 r2
 
-##discussion
-#MLE and LSE do not differ a lot in this case. The reason would be (Myung's paper).
-#In any estimation, the best fitting models are POW2 and EXPOW. Their fits almost overlapp.
-#Also, POW1 and POW2 do not show any big differnece. This is because the estimated parameter of POW2, which has a multiplicative effect on the power function, is almost 1, not having any big influence on the POW2

@@ -38,6 +38,7 @@ lse_pow1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   
   # Calculate SSE
   sse <- sum((p_corr-p)^2)
+  sse
   
 }
 
@@ -69,7 +70,7 @@ lse_pow2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   
   # Calculate SSE
   sse <- sum((p_corr-p)^2)
-  
+  sse
 }
 
 
@@ -100,7 +101,7 @@ lse_exp1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   
   # Calculate SSE
   sse <- sum((p_corr-p)^2)
-  
+  sse
 }
 
 
@@ -131,13 +132,13 @@ lse_exp2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   
   # Calculate SSE
   sse <- sum((p_corr-p)^2)
-  
+  sse
 }
 
 
 mle_expow <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # predicted probability by parameters
-  p <- param[1]*exp((-param[2])*int)*(1+int)^(param[3])
+  p <- param[1]*exp((-param[2])*int)*(1+int)^(-param[3])
   
   # ensure 0 < p < 1
   p[p<=0] <- 10e-6
@@ -152,7 +153,7 @@ mle_expow <- function(param, int=t_int, n=n_total, x=n_corr)  {
 
 lse_expow <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # predicted probability by parameters
-  p <- param[1]*exp((-param[2])*int)*(1+int)^(param[3])
+  p <- param[1]*exp((-param[2])*int)*(1+int)^(-param[3])
   p_corr <- x/n 
   
   # ensure 0 < p < 1
@@ -161,7 +162,7 @@ lse_expow <- function(param, int=t_int, n=n_total, x=n_corr)  {
   
   # Calculate SSE
   sse <- sum((p_corr-p)^2)
-  
+  sse
 }
 
 
@@ -192,7 +193,7 @@ lse_hyp1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   
   # Calculate SSE
   sse <- sum((p_corr-p)^2)
-  
+  sse
 }
 
 
@@ -223,5 +224,5 @@ lse_hyp2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   
   # Calculate SSE
   sse <- sum((p_corr-p)^2)
-  
+  sse
 }
