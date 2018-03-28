@@ -144,9 +144,12 @@ library(reshape2)
 
 melted=melt(graph_p,id.vars="x")
 p1 <- ggplot()+
-  geom_line(data=melted, aes(x=x,y=value, group=variable, colour=variable, linetype=variable), size=1)+
+  geom_line(data=melted, aes(x=x,y=value, colour=variable), size=1.2)+
   geom_point(aes(t_int,p_corr), size=4)+
-  labs(title="MLE results",x="Time t", y="Proportion Correct", linetype="Model", colour="Model")
+  labs(title="MLE results",x="Time t", y="Proportion Correct", colour="Model")+
+  theme(panel.background=element_rect(fill='white', colour='black'))+
+  theme(text=element_text(size=16,family="serif"))+
+  theme(plot.title=element_text(hjust=0.5))
 p1
   
 
@@ -256,13 +259,15 @@ lse_p_hyp1 <- 1/(1+lse_parm_hyp1[1]*x)
 lse_p_hyp2 <- lse_parm_hyp2[1]/(1+lse_parm_hyp2[2]*x)
 lse_graph_p <- data.frame(x, lse_p_pow1, lse_p_pow2, lse_p_exp1, lse_p_exp2, lse_p_expow, lse_p_hyp1, lse_p_hyp2)
 
-melted=melt(lse_graph_p,id.vars="x")
+lse_melted=melt(lse_graph_p,id.vars="x")
 p2 <- ggplot()+
-  geom_line(data=melted, aes(x=x,y=value, group=variable, colour=variable, linetype=variable), size=1)+
+  geom_line(data=lse_melted, aes(x=x,y=value, colour=variable), size=1.2)+
   geom_point(aes(t_int,p_corr), size=4)+
-  labs(title="LSE results",x="Time t", y="Proportion Correct", linetype="Model", colour="Model")
+  labs(title="LSE results",x="Time t", y="Proportion Correct", colour="Model")+
+  theme(panel.background=element_rect(fill='white', colour='black'))+
+  theme(text=element_text(size=16,family="serif"))+
+  theme(plot.title=element_text(hjust=0.5))
 p2
-  
 
 # print maximized likehood values
 print('- LSE results ------------')

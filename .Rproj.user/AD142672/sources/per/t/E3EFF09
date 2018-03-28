@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1522217999712.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1826365798",
+    "id" : "E3EFF09",
+    "lastKnownWriteTime" : 1522220869,
+    "last_content_update" : 1522220869200,
+    "path" : "C:/Users/CCSLAB1/Desktop/Computational_Modeling/Parm_Estm.R",
+    "project_path" : "Parm_Estm.R",
+    "properties" : {
+        "cursorPosition" : "315,3",
+        "scrollLine" : "298"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
