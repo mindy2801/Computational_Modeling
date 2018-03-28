@@ -26,6 +26,22 @@ mle_pow1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   sum(loglik)
 }
 
+lse_pow1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
+
+  # predicted probability by parameters
+  p <- (1+int)^(-param[1])
+  p_corr <- x/n 
+  
+  # ensure 0 < p < 1
+  p[p<=0] <- 10e-6
+  p[p>=1] <- 1 - 10e-6
+  
+  # Calculate SSE
+  sse <- sum((p_corr-p)^2)
+  sse
+  
+}
+
 
 mle_pow2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # predicted probability by parameters
@@ -42,6 +58,23 @@ mle_pow2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   sum(loglik)
 }
 
+lse_pow2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
+  
+  # predicted probability by parameters
+  p <- param[1]*(1+int)^(-param[2])
+  p_corr <- x/n 
+  
+  # ensure 0 < p < 1
+  p[p<=0] <- 10e-6
+  p[p>=1] <- 1 - 10e-6
+  
+  # Calculate SSE
+  sse <- sum((p_corr-p)^2)
+  sse
+}
+
+
+
 mle_exp1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # predicted probability by parameters
   p <- exp((-param[1])*int)
@@ -56,6 +89,22 @@ mle_exp1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # return the summed minus log-likelihood as the function value
   sum(loglik)
 }
+
+lse_exp1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
+  # predicted probability by parameters
+  p <- exp((-param[1])*int)
+  p_corr <- x/n 
+  
+  # ensure 0 < p < 1
+  p[p<=0] <- 10e-6
+  p[p>=1] <- 1 - 10e-6
+  
+  # Calculate SSE
+  sse <- sum((p_corr-p)^2)
+  sse
+}
+
+
 
 mle_exp2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # predicted probability by parameters
@@ -72,9 +121,24 @@ mle_exp2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   sum(loglik)
 }
 
+lse_exp2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
+  # predicted probability by parameters
+  p <- param[1]*exp((-param[2])*int)
+  p_corr <- x/n 
+  
+  # ensure 0 < p < 1
+  p[p<=0] <- 10e-6
+  p[p>=1] <- 1 - 10e-6
+  
+  # Calculate SSE
+  sse <- sum((p_corr-p)^2)
+  sse
+}
+
+
 mle_expow <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # predicted probability by parameters
-  p <- param[1]*exp((-param[2])*int)*(1+int)^(param[3])
+  p <- param[1]*exp((-param[2])*int)*(1+int)^(-param[3])
   
   # ensure 0 < p < 1
   p[p<=0] <- 10e-6
@@ -86,6 +150,21 @@ mle_expow <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # return the summed minus log-likelihood as the function value
   sum(loglik)
 }
+
+lse_expow <- function(param, int=t_int, n=n_total, x=n_corr)  {
+  # predicted probability by parameters
+  p <- param[1]*exp((-param[2])*int)*(1+int)^(-param[3])
+  p_corr <- x/n 
+  
+  # ensure 0 < p < 1
+  p[p<=0] <- 10e-6
+  p[p>=1] <- 1 - 10e-6
+  
+  # Calculate SSE
+  sse <- sum((p_corr-p)^2)
+  sse
+}
+
 
 mle_hyp1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # predicted probability by parameters
@@ -102,6 +181,22 @@ mle_hyp1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   sum(loglik)
 }
 
+
+lse_hyp1 <- function(param, int=t_int, n=n_total, x=n_corr)  {
+  # predicted probability by parameters
+  p <- 1/(1+param[1]*int)
+  p_corr <- x/n 
+  
+  # ensure 0 < p < 1
+  p[p<=0] <- 10e-6
+  p[p>=1] <- 1 - 10e-6
+  
+  # Calculate SSE
+  sse <- sum((p_corr-p)^2)
+  sse
+}
+
+
 mle_hyp2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   # predicted probability by parameters
   p <- param[1]/(1+param[2]*int)
@@ -115,4 +210,19 @@ mle_hyp2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
   
   # return the summed minus log-likelihood as the function value
   sum(loglik)
+}
+
+
+lse_hyp2 <- function(param, int=t_int, n=n_total, x=n_corr)  {
+  # predicted probability by parameters
+  p <- param[1]/(1+param[2]*int)
+  p_corr <- x/n 
+  
+  # ensure 0 < p < 1
+  p[p<=0] <- 10e-6
+  p[p>=1] <- 1 - 10e-6
+  
+  # Calculate SSE
+  sse <- sum((p_corr-p)^2)
+  sse
 }
