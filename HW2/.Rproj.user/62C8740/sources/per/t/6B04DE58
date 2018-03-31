@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1522464114096.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1225697148",
+    "id" : "6B04DE58",
+    "lastKnownWriteTime" : 1522462453,
+    "last_content_update" : 1522462453,
+    "path" : "C:/Users/mitue/Desktop/Computational_Modeling/HW2/model_select.R",
+    "project_path" : "model_select.R",
+    "properties" : {
+        "cursorPosition" : "63,172",
+        "scrollLine" : "47"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
