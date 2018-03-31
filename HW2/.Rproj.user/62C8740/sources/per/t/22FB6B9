@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1522462509778.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "399845695",
+    "id" : "22FB6B9",
+    "lastKnownWriteTime" : 1522464470,
+    "last_content_update" : 1522464470745,
+    "path" : "C:/Users/mitue/Desktop/Computational_Modeling/HW2/ra_MLE_prototype.R",
+    "project_path" : "ra_MLE_prototype.R",
+    "properties" : {
+        "cursorPosition" : "13,29",
+        "scrollLine" : "6"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
