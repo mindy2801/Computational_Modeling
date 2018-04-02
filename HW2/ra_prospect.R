@@ -1,5 +1,6 @@
-ra_prospect <- function(param, T=140, data=raw_data){
-  attach(data, warn.conflicts = FALSE) 
+ra_prospect <- function(param, T=140){
+
+  
   sum_minusLL = 0  # sum of minus log likelihood. Initialize
   for (t in 1:T) {
     #evSafe: expected value of a certain (safe) option
@@ -18,8 +19,8 @@ ra_prospect <- function(param, T=140, data=raw_data){
   sum_minusLL
 } 
 
-ra_noLA <- function(param, T=140, data=raw_data){
-  attach(data, warn.conflicts = FALSE)
+ra_noLA <- function(param, T=140){
+
   sum_minusLL = 0  # sum of minus log likelihood. Initialize
   
   for (t in 1:T) {

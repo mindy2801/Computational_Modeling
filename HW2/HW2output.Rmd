@@ -1,0 +1,56 @@
+---
+title: "HW2"
+author: "DY"
+date: "April 2, 2018"
+output: html_document
+---
+```{r include=FALSE, cache=FALSE}
+library(knitr)
+library(kableExtra)
+```
+
+##1.
+```{r echo=FALSE}
+load("model_select.RData")
+kable(modelcomp_summary, format="html", caption="Model Selection Results") %>%
+  kable_styling(full_width=F)
+```
+
+##2.
+###2.1 and 2.2
+```{r echo=FALSE}
+rm(list=ls())
+load("HW2.Rdata")
+
+#Rowname and colname
+rname <- c()
+for(i in subj_list){
+  rname <- c(rname, paste("Subject",i))
+}
+cname <- c("Rho", "Tau", "Lambda")
+rownames(allsub_m1_par) <- rname; colnames(allsub_m1_par) <- cname
+
+kable(allsub_m1_par, format="html", caption = "Estimated Parameters for Each Subject") %>%
+  kable_styling(full_width=F)
+
+selection <- rbind(AIC, BIC)
+rownames(selection) <- c("AIC", "BIC")
+kable(selection, format="html", col.names="", caption = "ra_prospect Model") %>%
+  kable_styling(full_width=F)
+
+```
+###2.3
+```{r echo=FALSE}
+
+cname <- c("Rho", "Tau")
+rownames(allsub_m2_par) <- rname; colnames(allsub_m2_par) <- cname
+kable(allsub_m2_par, format="html", caption = "Estimated Parameters for Each Subject") %>%
+  kable_styling(full_width=F)
+
+selection <- rbind(AIC2, BIC2)
+rownames(selection) <- c("AIC", "BIC")
+kable(selection, format="html", col.names="", caption = "ra_noLA Model") %>%
+  kable_styling(full_width=F)
+
+```
+
