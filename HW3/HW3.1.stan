@@ -1,9 +1,8 @@
 data {
   int<lower=1> T;
-  int<lower=0, upper=1> gamble[T];
-  real cert[T];
-  real<lower=0> gain[T];
-  real<lower=0> loss[T];  // absolute loss amount
+  int<lower=0> k[T];
+  int<lower=1> n[T];
+  
 }
 
 parameters {
@@ -14,5 +13,6 @@ parameters {
 
 model {
   theta ~ beta(2, 2);
+  k ~ binomial(n, theta);
 
 }
