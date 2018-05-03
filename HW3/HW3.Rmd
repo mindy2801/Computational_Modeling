@@ -1,39 +1,41 @@
 ---
-title: "HW3"
-author: "DY"
-date: "2018년 5월 3일"
-output: html_document
+title: "Homework 3"
+output: word_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## Question 1
 ### 1.1
-![optional caption text](graphical model.png)
+<div style="text-align:center" markdown="1">
+![](graphical model.png)
 
 ### 1.2
-![optional caption text](Rplot.png)
+![](Rplot.png)
 
+</div>
 
 ## Question 2
 ### 2.1
-![optional caption text](subject2.png)
-![optional caption text](subject3.png)
-![optional caption text](subject4.png)
-![optional caption text](subject6.png)
-![optional caption text](subject7.png)
-
+<div style="text-align:center" markdown="1">
+![](subject2.png)
+![](subject3.png)
+![](subject4.png)
+![](subject6.png)
+![](subject7.png)
+</div>
 ### 2.2
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, include=FALSE}
 load("posterior mean.RData")
 library(knitr)
 kable(par_mean)
 ```
 
+```{r echo=FALSE}
+kable(par_mean)
+```
 
 ### 2.3
-![optional caption text](estimates_comparison.png)
+<div style="text-align:center" markdown="1">
+![](estimates_comparison.png)
 
-
+</div>
