@@ -16,11 +16,11 @@ T = table(dat$subjID)[1]  # number of trials per subject (=140)
 numIter = 100             # number of iterations to find global minimum values
 numPars = 3               # number of parameters
 
-# use first subject only
 
 dataList <- list(
   T       = T,
   N       = N,
+  Tsubj   = table(dat$subjID),
   gain    = matrix(dat$gain, nrow=N, ncol=T, byrow=T), #matrix[N,T]
   loss    = matrix(abs(dat$loss), nrow=N, ncol=T, byrow=T), # absolute value
   cert    = matrix(dat$cert, nrow=N, ncol=T, byrow=T),
@@ -28,11 +28,11 @@ dataList <- list(
 )
 
 # run!
-output = stan("ra_prospect_multipleSubj.stan", data = dataList,
+output = stan("ra_prospect_w_reparam.stan", data = dataList,
               iter = 1000, warmup=500, chains=2, cores=2)
 
 ### load existing output
-load("ra_prospect_multipleSubj.RData")
+load("ra_prospect_w_reparam.RData")
 
 # traceplot
 traceplot(output, pars="rho")
