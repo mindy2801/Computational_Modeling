@@ -73,7 +73,7 @@ group <- melt(group, id="index")
 group_HDI <- group %>% group_by(index, variable) %>% 
   summarise(mean=mean(value),HDI1=HDIofMCMC(value)[1], HDI2=HDIofMCMC(value)[2])
 
-ggplot(group, aes(value, fill=variable)) + geom_histogram(bins = 50) + 
+g3 <- ggplot(group, aes(value, fill=variable)) + geom_histogram(bins = 50) + 
   facet_wrap(~index+variable, scale="free_x") + 
   geom_vline(data=group_HDI, aes(xintercept=mean), 
              linetype="dashed", size=1) +
@@ -90,12 +90,13 @@ individual <- melt(individual, id="index")
 individual_HDI <- individual %>% group_by(index, variable) %>% 
   summarise(mean=mean(value),HDI1=HDIofMCMC(value)[1], HDI2=HDIofMCMC(value)[2])
 
-ggplot(individual, aes(value, fill=variable)) + geom_histogram(bins = 50) + 
+i3 <- ggplot(individual, aes(value, fill=variable)) + geom_histogram(bins = 50) + 
   facet_wrap(~index+variable, scale="free_x", nrow=3) + 
   geom_vline(data=individual_HDI, aes(xintercept=mean), 
              linetype="dashed", size=1) +
   geom_errorbarh(data=individual_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
                  height=20, size=1) +
   ylab(label="")
+
 
 

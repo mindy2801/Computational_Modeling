@@ -1,0 +1,41 @@
+---
+title: "Homework 4"
+author: "DY"
+date: "2018<eb>ÖÑ 5<ec>õî 17<ec>ùº"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+load("C:/Users/Mindy/Desktop/Github/Computational_Modeling/HW4/q2/q2_graph.RData")
+```
+
+#Q1
+I don't know why(I guess it's my laptop), but sampling in retention model seems to take extremely long time and I couldn't wait untill it is done. Thus, I couldn't get a valid result. I completed codes for m4, graphs for posterior distributionsand LOOIC, but without checking their validity.
+```{r}
+
+
+```
+
+
+
+#Q2
+##Graph for ra_prospect_w_reparam.stan
+```{r}
+g1
+i1
+```
+
+##Graph for ra_prospect_w_reparam_a.stan
+```{r}
+g2
+i2
+```
+
+##Graph for ra_prospect_w_reparam_b.stan
+```{r}
+g3
+i3
+```
