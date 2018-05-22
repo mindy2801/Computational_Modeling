@@ -1,0 +1,22 @@
+---
+title: "Homwork 5"
+author: "DY"
+date: "2018³â 5¿ù 21ÀÏ"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+g_mu
+g_sigma
+i_alpha
+i_beta
+c
+
+What's left
+Q2: graph, and essay
+Q3: run sampling, graph, and essay
+Q4: run sampling,

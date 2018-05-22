@@ -13,35 +13,23 @@ transformed data {
 }
 
 parameters {
-// Declare all parameters as vectors for vectorizing
-  // Hyper(group)-parameters  
-  vector[2] mu_p;  
-  vector<lower=0>[2] sigma;
-    
-  // Subject-level raw parameters (for Matt trick)
-  vector[N] alpha_pr;    // learning rate [0, 1]
-  vector[N] beta_pr;  // inverse temperature [0, 5]
+  vector<lower=0,upper=1>[N] alpha;
+  vector<lower=0,upper=5>[N] beta;
+  
+
 }
 
 transformed parameters {
   // subject-level parameters
-  vector<lower=0,upper=1>[N] alpha;
-  vector<lower=0,upper=5>[N] beta;
-  
-  for (i in 1:N) {
-    alpha[i] = Phi_approx( mu_p[1] + sigma[1] * alpha_pr[i] );
-    beta[i] = Phi_approx( mu_p[2] + sigma[2] * beta_pr[i] ) * 5;
-  }
+
+
 }
 
 model {
-  // Hyperparameters
-  mu_p  ~ normal(0, 1); 
-  sigma ~ normal(0, 1);  
-  
   // individual parameters
-  alpha_pr ~ normal(0,1);
-  beta_pr ~ normal(0,1);
+  alpha ~ uniform(0, 1);
+  beta  ~ uniform(0, 5);
+  
   
   // subject loop and trial loop
   for (i in 1:N) {

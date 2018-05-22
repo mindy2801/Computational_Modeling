@@ -5,11 +5,8 @@
 
 library(rstan)
 
-# set working directory where all the files exist
-setwd("~/Dropbox/Teaching/SNU/2018_Computational_modeling/HW_for_instructor/HW5/")
-
 # read the data file
-dat = read.table("simul_data_hw5_model1.txt", header=T, sep="\t")
+dat = read.table("simul_data_hw5_model1.1.txt", header=T, sep="\t")
 
 allSubjs = unique(dat$subjID)  # all subject IDs
 N = length(allSubjs)      # number of subjects
@@ -46,16 +43,12 @@ print(output)
 # extract Stan fit object (parameters)
 parameters <- rstan::extract(output)
 
-alpha_mean = apply(parameters$alpha, 2, mean)
-alpha_sd = apply(parameters$alpha, 2, sd)
-beta_mean = apply(parameters$beta, 2, mean)
-beta_sd = apply(parameters$beta, 2, sd)
-
 ## 1.2a
 source("HDIofMCMC.R")
 source("multiplot.R")
 library(dplyr)
 library(ggplot2)
+library(reshape2)
 
 ### Group parameters: mu_p, sigma
 colnames(parameters$mu_p) <- c("alpha","beta")
@@ -72,27 +65,35 @@ sigma_HDI <- sigma %>% group_by(parameter) %>% summarise(mean=mean(value),
                                                          HDI2=HDIofMCMC(value)[2])
 
 
-g_mu <- ggplot(mu_p, aes(value, fill=parameter)) + geom_histogram(bins = 50) + 
-  facet_wrap(~parameter, nrow=2) + 
-  geom_vline(data=mu_p_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=mu_p_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(), 
-        axis.title.x=element_blank(),
-        legend.position="none")
+g_mu <- ggplot(mu_p, aes(value)) + geom_density() + 
+  facet_wrap(~parameter, nrow=2) 
 
-g_sigma <- ggplot(sigma, aes(value, fill=parameter)) + geom_histogram(bins = 50) + 
-  facet_wrap(~parameter, nrow=2) + 
-  geom_vline(data=sigma_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=sigma_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(),
-        axis.title.x=element_blank(),
-        legend.position="none")
+d <- ggplot_build(g_mu)$data[[1]] 
+d <- d %>% mutate(parameter=rep(c("alpha","beta"), each=nrow(d)/2)) %>% select(x,y,parameter) %>% 
+  merge(mu_p_HDI, by="parameter") %>% group_by(parameter) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+g_mu <- g_mu + geom_area(data = d, 
+                 aes(x=x, y=y), fill="#FF9999", colour="black", group="parameter") + 
+  geom_vline(data=mu_p_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+ 
+
+g_sigma <- ggplot(sigma, aes(value)) + geom_density() + 
+  facet_wrap(~parameter, nrow=2) 
+
+d <- ggplot_build(g_sigma)$data[[1]] 
+d <- d %>% mutate(parameter=rep(c("alpha","beta"), each=nrow(d)/2)) %>% 
+  select(x,y,parameter) %>% 
+  merge(sigma_HDI, by="parameter") %>% group_by(parameter) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+g_sigma <- g_sigma + geom_area(data = d, 
+                 aes(x=x, y=y), fill="#FF9999", colour="black", group="parameter") + 
+  geom_vline(data=sigma_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+
 
 multiplot(g_mu, g_sigma, cols=2)
 
@@ -112,29 +113,38 @@ beta_HDI <- beta %>% group_by(subject) %>% summarise(mean=mean(value),
                                                        HDI1=HDIofMCMC(value)[1], 
                                                        HDI2=HDIofMCMC(value)[2])
 
-i_alpha <- ggplot(alpha, aes(value, fill=subject)) + geom_histogram(bins = 50) + 
-  facet_wrap(~subject, ncol=1) + 
-  geom_vline(data=alpha_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=alpha_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(), 
-        axis.title.x=element_blank(),
-        legend.position="none")
-
-i_beta <- ggplot(beta, aes(value, fill=subject)) + geom_histogram(bins = 50) + 
-  facet_wrap(~subject, ncol=1) + 
-  geom_vline(data=beta_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=beta_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(), 
-        axis.title.x=element_blank(),
-        legend.position="none")
 
 
+i_alpha <- ggplot(alpha, aes(value)) + geom_density() + 
+  facet_wrap(~subject, ncol=2) 
+
+d <- ggplot_build(i_alpha)$data[[1]] 
+d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
+  select(x,y,subject) %>% 
+  merge(alpha_HDI, by="subject") %>% group_by(subject) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+i_alpha <-i_alpha + geom_area(data = d, 
+                               aes(x=x, y=y), fill="#FF9999", colour="black", group="subject") + 
+  geom_vline(data=alpha_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+i_beta <- ggplot(beta, aes(value)) + geom_density() + 
+  facet_wrap(~subject, ncol=2) 
+
+d <- ggplot_build(i_beta)$data[[1]] 
+d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
+  select(x,y,subject) %>% 
+  merge(beta_HDI, by="subject") %>% group_by(subject) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+i_beta <-i_beta + geom_area(data = d, 
+                              aes(x=x, y=y), fill="#FF9999", colour="black", group="subject") + 
+  geom_vline(data=beta_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+
+multiplot(i_alpha, i_beta, cols=2)
 
 ## 1.2b
 ### x: true parameters, y: estimated parameters and add 1sd error bars
@@ -148,12 +158,13 @@ estm_pars <- data.frame(alpha = alpha_HDI$mean,
                         beta = beta_HDI$mean, 
                         subjID = 1:N)
 estm_pars <- reshape2::melt(estm_pars, id="subjID")
+estm_pars <- estm_pars %>% mutate(sd=c(alpha_HDI$sd, beta_HDI$sd))
 
 pars_compare <- merge(true_pars, estm_pars, by=c("subjID","variable")) %>% 
   arrange(variable, subjID) %>% rename(true=value.x, estm=value.y, parameter=variable)
   
-ggplot(pars_compare, aes(x=true, y=estm)) + geom_point() + 
+c <- ggplot(pars_compare, aes(x=true, y=estm)) + geom_point() + 
   facet_wrap(~parameter, scales = "free") +
-  geom_abline(aes(intercept=0, slope=1, colour="red"))
-
+  geom_abline(aes(intercept=0, slope=1, colour="red")) +
+  geom_errorbar(aes(ymin=estm-sd, ymax=estm+sd))
 
