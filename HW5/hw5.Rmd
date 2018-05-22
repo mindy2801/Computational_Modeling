@@ -6,17 +6,110 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+load("C:/Users/Mindy/Desktop/Github/Computational_Modeling/HW5/graph.RData")
+load("C:/Users/Mindy/Desktop/Github/Computational_Modeling/HW5/graph2.RData")
+load("C:/Users/Mindy/Desktop/Github/Computational_Modeling/HW5/graph3.RData")
+load("C:/Users/Mindy/Desktop/Github/Computational_Modeling/HW5/graph4.RData")
+source("C:/Users/Mindy/Desktop/Github/Computational_Modeling/HW5/multiplot.R")
+
+```
+
+#1. Simulation and parameter recovery using a simple reinforcement learning model. 
+##1.1. Generate simulated data.
+FILE: simul_data_hw5_model1.txt
+
+##1.2.a. Find the posterior distribution of individual and group (hyper) parameters.
+FILE: hw5_model1.R, hw5_model1.stan
+```{r}
+g_mu <- g_mu + ggtitle("Group parameters: mu")
+g_sigma <- g_sigma + ggtitle("Group parameters: sigma")
+
+multiplot(g_mu, g_sigma, cols=2)
+
+i_alpha + ggtitle("Individual parameters: alpha")
+i_beta + ggtitle("Individual parameters: beta")
+```
+
+##1.2.b. Draw a scatterplot of true parameters and estimated parameters 
+```{r}
+c + ggtitle("Scatterplot of true vs. estimated parameters") +
+  theme(legend.position="none")
+```
+
+Generally, the range of estimated paramters covers the value of true parameters.
+
+#Q2. Comparing the outputs from hierarchical and non-hierarchical Bayesian models. 
+##2.1.
+FILE: hw5_model2.R, hw5_model2.stan
+```{r}
+i2_alpha + ggtitle("Individual parameters with no hierarchy: alpha")
+i2_beta + ggtitle("Individual parameters with no hierarchy: beta")
+```
+
+##2.2.
+```{r}
+c2 + ggtitle("Scatterplot of true vs. estimated parameters with no hierarchy") +
+  theme(legend.position="none")
+```
+
+##2.3.
+1. The estimated parameters with no hierarchy have values more closer to the true values than thoes with a hierarchy. The difference seems to come from the fact that true parameters of some subjects are quite extreme. Since there happens shrinkage effect within a hierarchical structure, the true extremeness would have been disappeared.
+
+2. Also, the error bars in the estimated parameters with no hierarchy are generally narrower than those with a hierarchy. It also causes from the shrinkage effect. By pulling an individual's extreme parameter to more moderate value, this certainly creates a gap between the collected data and the estimation, thus creating more errors in the hierarchical structure.
+
+#Q3. ¡°Shrinkage¡± in hierarchical Bayesian data analysis.
+##3.1.Set num_subjs = 200, num_trials=100 and generate 200 fake subjects¡¯ data. 
+FILE: simul_data_hw5_model1.1.txt
+
+##3.2.
+FILE: hw5_model1.1.R
+```{r}
+g3_mu <- g3_mu + ggtitle("Group parameters: mu")
+g3_sigma <- g3_sigma + ggtitle("Group parameters: sigma")
+
+multiplot(g3_mu, g3_sigma, cols=2)
+
+i3_alpha + ggtitle("Individual parameters: alpha")
+i3_beta + ggtitle("Individual parameters: beta")
+```
+
+##3.3.
+```{r}
+c3 + ggtitle("Scatterplot of true vs. estimated parameters") +
+  theme(legend.position="none")
+```
+
+##3.4. Do you notice ¡°shrinkage¡± in one parameter but not so much in the other parameter? Can you explain why? 
+ANSWER: why partial shrinkage?
+
+#Q4.Modify provided Stan and R codes so that we can allow two learning rates in the reinforcement learning model. 
+##4.1. Find the posterior distribution of individual and group (hyper) parameters. 
+```{r}
+g4_mu <- g4_mu + ggtitle("Group parameters: mu")
+g4_sigma <- g4_sigma + ggtitle("Group parameters: sigma")
+
+multiplot(g4_mu, g4_sigma, cols=2)
+
+i4_alpha_pos + ggtitle("Individual parameters: alpha_pos")
+i4_alpha_neg + ggtitle("Individual parameters: alpha_neg")
+i4_beta + ggtitle("Individual parameters: beta")
+```
+
+##4.2. Draw a scatterplot of true parameters and estimated parameters.
+```{r}
+c4.1 + ggtitle("Scatterplot of true vs. estimated parameters with option(0.5, 0.8)") +
+  theme(legend.position="none")
+```
+
+##4.3. 
+```{r}
+c4.2 + ggtitle("Scatterplot of true vs. estimated parameters with option(0.3, 0.6)") +
+  theme(legend.position="none")
 ```
 
 
-g_mu
-g_sigma
-i_alpha
-i_beta
-c
+##4.4. Do you notice any difference between what you found in (2) and (3)? Try to explain what made the difference.
 
-What's left
-Q2: graph, and essay
-Q3: run sampling, graph, and essay
-Q4: run sampling,
+ANSWER

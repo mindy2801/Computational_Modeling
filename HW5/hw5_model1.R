@@ -1,12 +1,12 @@
 # hw5_model1_exec.R
 # Programmed by Woo-Young Ahn (wahn55@snu.ac.kr), May 2018
 
-#rm(list=ls())  # remove all variables
+rm(list=ls())  # remove all variables
 
 library(rstan)
 
 # read the data file
-dat = read.table("simul_data_hw5_model1.1.txt", header=T, sep="\t")
+dat = read.table("simul_data_hw5_model1.txt", header=T, sep="\t")
 
 allSubjs = unique(dat$subjID)  # all subject IDs
 N = length(allSubjs)      # number of subjects
@@ -41,6 +41,7 @@ traceplot(output)
 print(output)
 
 # extract Stan fit object (parameters)
+
 parameters <- rstan::extract(output)
 
 ## 1.2a
@@ -116,7 +117,7 @@ beta_HDI <- beta %>% group_by(subject) %>% summarise(mean=mean(value),
 
 
 i_alpha <- ggplot(alpha, aes(value)) + geom_density() + 
-  facet_wrap(~subject, ncol=2) 
+  facet_wrap(~subject, ncol=6) 
 
 d <- ggplot_build(i_alpha)$data[[1]] 
 d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
@@ -130,7 +131,7 @@ i_alpha <-i_alpha + geom_area(data = d,
   xlab("") + theme_bw()
 
 i_beta <- ggplot(beta, aes(value)) + geom_density() + 
-  facet_wrap(~subject, ncol=2) 
+  facet_wrap(~subject, ncol=6) 
 
 d <- ggplot_build(i_beta)$data[[1]] 
 d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
@@ -144,7 +145,6 @@ i_beta <-i_beta + geom_area(data = d,
   xlab("") + theme_bw()
 
 
-multiplot(i_alpha, i_beta, cols=2)
 
 ## 1.2b
 ### x: true parameters, y: estimated parameters and add 1sd error bars
@@ -168,3 +168,5 @@ c <- ggplot(pars_compare, aes(x=true, y=estm)) + geom_point() +
   geom_abline(aes(intercept=0, slope=1, colour="red")) +
   geom_errorbar(aes(ymin=estm-sd, ymax=estm+sd))
 
+
+save(c, g_mu, g_sigma, i_alpha, i_beta, file="graph.RData")

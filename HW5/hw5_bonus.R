@@ -1,91 +1,8 @@
-# generate data for bonus question
 rm(list=ls())
 
-# Simulation parameters
-seed <- 08826    # do not change the seed number!
-num_subjs  <- 30 # number of subjects
-num_trials <- 100 # number of trials per subject
-pr_correct_option1 <- 0.5  # reward probability in option 1
-pr_correct_option2 <- 0.8  # reward probability in option 2
-
-# Set seed
-set.seed(seed)   # always set a seed number for this homework!
-
-# True parameters 
-simul_pars = data.frame(alpha_pos = rnorm(num_subjs, 0.20, 0.08),
-                        alpha_neg = rnorm(num_subjs, 0.30, 0.10),
-                        beta = rnorm(num_subjs, 2.00, 0.70),
-                        subjID  = 1:num_subjs) 
-
-# For storing simulated choice data for all subjects
-all_data <- NULL
-
-for (i in 1:num_subjs) {
-  # Individual-level (i.e. per subject) parameter values
-  alpha_pos <- simul_pars$alpha_pos[i]
-  alpha_neg <- simul_pars$alpha_neg[i]
-  beta <- simul_pars$beta[i]
-  
-  # geneate payoff structure for each subject
-  # Defaults for the two options 
-  # option 1: 50% win (+1), 50% loss (-1)
-  # option 2: 80% win (+1), 20% loss (-1)
-  payoff_option1 = rbinom(size=1, n = num_trials, prob = pr_correct_option1)
-  payoff_option2 = rbinom(size=1, n = num_trials, prob = pr_correct_option2)
-  
-  # Replace 0 with -1
-  payoff_option1[payoff_option1 == 0] = -1   # if 0 --> replace it with -1
-  payoff_option2[payoff_option2 == 0] = -1   # if 0 --> replace it with -1
-  payoff_both = data.frame(payoff_option1, payoff_option2)
-  
-  # For storing simulated data for current subject
-  # subjID = subject ID
-  # trial = trial number
-  # choice = choice made on each trial (1 or 2)
-  # outcome = outcome reveived on each trial (1 or -1)
-  tmp_data = data.frame( subjID=NULL, trial=NULL, choice=NULL, outcome=NULL)
-  
-  # initialize some variables
-  sv = c(0, 0)  # stimulus value of two options
-  
-  for (t in 1:num_trials)  {
-    # Prob of choosing option 2
-    prob_choose2 = 1 / (1 + exp(beta * (sv[1] - sv[2])))  # exploration/exploitation parameter is set to 1
-    
-    # choice
-    choice = rbinom(size=1, n = 1, prob = prob_choose2 )
-    choice = choice + 1  # 0 or 1 --> 1 (option 1) or 2 (option 2)
-    
-    # outcome
-    outcome = payoff_both[t, choice]
-    
-    # after receiving outcome (feedback), update sv[t+1]
-    # prediction error (PE)
-    PE = outcome - sv[choice]
-    
-    # update stimulus value (sv) of the chosen option
-    if (PE >= 0){
-      sv[choice] = sv[choice] + alpha_pos * (outcome - sv[choice] )
-    } else{
-      sv[choice] = sv[choice] + alpha_neg * (outcome - sv[choice] )
-    }
-
-    
-    # append simulated task/response to subject data
-    tmp_data[t, "subjID"] = i
-    tmp_data[t, "trial"] = t
-    tmp_data[t, "choice"] = choice
-    tmp_data[t, "outcome"] = outcome
-  } # end of t loop
-  # Append current subject with all subjects' data
-  all_data = rbind(all_data, tmp_data)
-}
-
-dat <- all_dat
-
-#
+# 4.1 
+dat <- read.table("simul_data_hw5_bonus1.txt", header=T, sep="\t")
 library(rstan)
-
 
 allSubjs = unique(dat$subjID)  # all subject IDs
 N = length(allSubjs)      # number of subjects
@@ -110,7 +27,7 @@ dataList <- list(
 )
 
 # run!
-output = stan("hw5_model1.stan", data = dataList, 
+output = stan("hw5_bonus.stan", data = dataList, 
               iter = 2000, warmup=1000, chains=2, cores=2)
 
 # traceplot
@@ -120,14 +37,10 @@ traceplot(output)
 print(output)
 
 # extract Stan fit object (parameters)
+load("hw5_bonus1.RData")
 parameters <- rstan::extract(output)
 
-alpha_mean = apply(parameters$alpha, 2, mean)
-alpha_sd = apply(parameters$alpha, 2, sd)
-beta_mean = apply(parameters$beta, 2, mean)
-beta_sd = apply(parameters$beta, 2, sd)
-
-## 1.2a
+## 4.1
 source("HDIofMCMC.R")
 source("multiplot.R")
 library(dplyr)
@@ -135,8 +48,8 @@ library(ggplot2)
 library(reshape2)
 
 ### Group parameters: mu_p, sigma
-colnames(parameters$mu_p) <- c("alpha","beta")
-colnames(parameters$sigma) <- c("alpha","beta")
+colnames(parameters$mu_p) <- c("alpha_pos","alpha_neg","beta")
+colnames(parameters$sigma) <- c("alpha_pos","alpha_neg","beta")
 
 mu_p <- parameters$mu_p %>% reshape2::melt() %>% rename(parameter=Var2)
 mu_p_HDI <- mu_p %>% group_by(parameter) %>% summarise(mean=mean(value),
@@ -149,39 +62,55 @@ sigma_HDI <- sigma %>% group_by(parameter) %>% summarise(mean=mean(value),
                                                          HDI2=HDIofMCMC(value)[2])
 
 
-g_mu <- ggplot(mu_p, aes(value, fill=parameter)) + geom_histogram(bins = 50) + 
-  facet_wrap(~parameter, nrow=2) + 
-  geom_vline(data=mu_p_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=mu_p_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(), 
-        axis.title.x=element_blank(),
-        legend.position="none")
+g4_mu <- ggplot(mu_p, aes(value)) + geom_density() + 
+  facet_wrap(~parameter, nrow=3) 
 
-g_sigma <- ggplot(sigma, aes(value, fill=parameter)) + geom_histogram(bins = 50) + 
-  facet_wrap(~parameter, nrow=2) + 
-  geom_vline(data=sigma_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=sigma_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(),
-        axis.title.x=element_blank(),
-        legend.position="none")
+d <- ggplot_build(g4_mu)$data[[1]] 
+d <- d %>% mutate(parameter=rep(c("alpha_pos","alpha_neg","beta"), each=nrow(d)/3)) %>% select(x,y,parameter) %>% 
+  merge(mu_p_HDI, by="parameter") %>% group_by(parameter) %>% 
+  filter(x <= HDI2 & x >= HDI1)
 
-multiplot(g_mu, g_sigma, cols=2)
+g4_mu <- g4_mu + geom_area(data = d, 
+                           aes(x=x, y=y), fill="#FF9999", colour="black", group="parameter") + 
+  geom_vline(data=mu_p_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+
+g4_sigma <- ggplot(sigma, aes(value)) + geom_density() + 
+  facet_wrap(~parameter, nrow=3) 
+
+d <- ggplot_build(g4_sigma)$data[[1]] 
+d <- d %>% mutate(parameter=rep(c("alpha_pos","alpha_neg","beta"), each=nrow(d)/3)) %>% 
+  select(x,y,parameter) %>% 
+  merge(sigma_HDI, by="parameter") %>% group_by(parameter) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+g4_sigma <- g4_sigma + geom_area(data = d, 
+                                 aes(x=x, y=y), fill="#FF9999", colour="black", group="parameter") + 
+  geom_vline(data=sigma_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+
+
+multiplot(g4_mu, g4_sigma, cols=2)
 
 ### Individual parameters: alpha, beta
-colnames(parameters$alpha) <- paste("subj",1:N, sep="")
+colnames(parameters$alpha_pos) <- paste("subj",1:N, sep="")
+colnames(parameters$alpha_neg) <- paste("subj",1:N, sep="")
 colnames(parameters$beta) <- paste("subj",1:N, sep="")
 
-alpha <- parameters$alpha %>% reshape2::melt() %>% rename(subject=Var2)
-alpha_HDI <- alpha %>% group_by(subject) %>% summarise(mean=mean(value),
+alpha_pos <- parameters$alpha_pos %>% reshape2::melt() %>% rename(subject=Var2)
+alpha_pos_HDI <- alpha_pos %>% group_by(subject) %>% summarise(mean=mean(value),
                                                        sd  =sd(value),
                                                        HDI1=HDIofMCMC(value)[1], 
                                                        HDI2=HDIofMCMC(value)[2])
+
+alpha_neg <- parameters$alpha_neg %>% reshape2::melt() %>% rename(subject=Var2)
+alpha_neg_HDI <- alpha_neg %>% group_by(subject) %>% summarise(mean=mean(value),
+                                                               sd  =sd(value),
+                                                               HDI1=HDIofMCMC(value)[1], 
+                                                               HDI2=HDIofMCMC(value)[2])
+
 
 beta <- parameters$beta %>% reshape2::melt() %>% rename(subject=Var2)
 beta_HDI <- beta %>% group_by(subject) %>% summarise(mean=mean(value),
@@ -189,49 +118,181 @@ beta_HDI <- beta %>% group_by(subject) %>% summarise(mean=mean(value),
                                                      HDI1=HDIofMCMC(value)[1], 
                                                      HDI2=HDIofMCMC(value)[2])
 
-i_alpha <- ggplot(alpha, aes(value, fill=subject)) + geom_histogram(bins = 50) + 
-  facet_wrap(~subject, ncol=1) + 
-  geom_vline(data=alpha_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=alpha_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(), 
-        axis.title.x=element_blank(),
-        legend.position="none")
 
-i_beta <- ggplot(beta, aes(value, fill=subject)) + geom_histogram(bins = 50) + 
-  facet_wrap(~subject, ncol=1) + 
-  geom_vline(data=beta_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=beta_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(), 
-        axis.title.x=element_blank(),
-        legend.position="none")
 
-multiplot(i_alpha, i_beta, cols=2)
+i4_alpha_pos <- ggplot(alpha_pos, aes(value)) + geom_density() + 
+  facet_wrap(~subject, ncol=6) 
 
-## 1.2b
+d <- ggplot_build(i4_alpha_pos)$data[[1]] 
+d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
+  select(x,y,subject) %>% 
+  merge(alpha_pos_HDI, by="subject") %>% group_by(subject) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+i4_alpha_pos <-i4_alpha_pos + geom_area(data = d, 
+                                aes(x=x, y=y), fill="#FF9999", colour="black", group="subject") + 
+  geom_vline(data=alpha_pos_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+i4_alpha_neg <- ggplot(alpha_neg, aes(value)) + geom_density() + 
+  facet_wrap(~subject, ncol=6) 
+
+d <- ggplot_build(i4_alpha_neg)$data[[1]] 
+d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
+  select(x,y,subject) %>% 
+  merge(alpha_neg_HDI, by="subject") %>% group_by(subject) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+i4_alpha_neg <-i4_alpha_neg + geom_area(data = d, 
+                                        aes(x=x, y=y), fill="#FF9999", colour="black", group="subject") + 
+  geom_vline(data=alpha_neg_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+
+i4_beta <- ggplot(beta, aes(value)) + geom_density() + 
+  facet_wrap(~subject, ncol=6) 
+
+d <- ggplot_build(i4_beta)$data[[1]] 
+d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
+  select(x,y,subject) %>% 
+  merge(beta_HDI, by="subject") %>% group_by(subject) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+i4_beta <-i4_beta + geom_area(data = d, 
+                              aes(x=x, y=y), fill="#FF9999", colour="black", group="subject") + 
+  geom_vline(data=beta_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+
+
+## 4.2
 ### x: true parameters, y: estimated parameters and add 1sd error bars
 set.seed(08826)
-true_pars <- data.frame(alpha = rnorm(N, 0.20, 0.08),
+true_pars = data.frame(alpha_pos = rnorm(N, 0.20, 0.08),
+                        alpha_neg = rnorm(N, 0.30, 0.10),
                         beta = rnorm(N, 2.00, 0.70),
-                        subjID  = 1:N) #true
-true_pars <- reshape2::melt(true_pars, id="subjID")
+                        subjID  = 1:N) 
+true_pars <- melt(true_pars, id="subjID")
 
-estm_pars <- data.frame(alpha = alpha_HDI$mean, 
+estm_pars <- data.frame(alpha_pos = alpha_pos_HDI$mean,
+                        alpha_neg = alpha_neg_HDI$mean,
                         beta = beta_HDI$mean, 
                         subjID = 1:N)
-estm_pars <- reshape2::melt(estm_pars, id="subjID")
-estm_pars <- estm_pars %>% mutate(sd=c(alpha_HDI$sd, beta_HDI$sd))
+estm_pars <- melt(estm_pars, id="subjID")
+estm_pars <- estm_pars %>% mutate(sd=c(alpha_pos_HDI$sd, alpha_neg_HDI$sd, 
+                                       beta_HDI$sd))
 
 pars_compare <- merge(true_pars, estm_pars, by=c("subjID","variable")) %>% 
   arrange(variable, subjID) %>% rename(true=value.x, estm=value.y, parameter=variable)
 
-c <- ggplot(pars_compare, aes(x=true, y=estm)) + geom_point() + 
+c4.1 <- ggplot(pars_compare, aes(x=true, y=estm)) + geom_point() + 
   facet_wrap(~parameter, scales = "free") +
   geom_abline(aes(intercept=0, slope=1, colour="red")) +
   geom_errorbar(aes(ymin=estm-sd, ymax=estm+sd))
 
+
+#4.3.
+loc <- which(!(ls() %in% c("i4_alpha_neg", "i4_alpha_pos", "i4_beta", 
+                  "g4_mu", "g4_sigma", "c4.1")))
+rm(list=ls()[loc])
+
+
+source("HDIofMCMC.R")
+source("multiplot.R")
+dat <- read.table("simul_data_hw5_bonus2.txt", header=T, sep="\t")
+
+allSubjs = unique(dat$subjID)  # all subject IDs
+N = length(allSubjs)      # number of subjects
+T = table(dat$subjID)[1]  # number of trials per subject 
+
+choice  <- array(-1, c(N, T))
+outcome <- array(0, c(N, T))
+
+for (i in 1:N) {
+  curSubj = allSubjs[i]
+  tmp     = subset(dat, subjID == curSubj)
+  choice[i, 1:T] <- tmp$choice
+  outcome[i, 1:T] <- tmp$outcome
+}
+
+dataList <- list(
+  N       = N,
+  T       = T,
+  Tsubj   = rep(T, N),
+  choice  = choice,
+  outcome = outcome
+)
+
+# run!
+output = stan("hw5_bonus.stan", data = dataList, 
+              iter = 2000, warmup=1000, chains=2, cores=2)
+
+
+# extract Stan fit object (parameters)
+load("hw5_bonus2.RData")
+parameters <- rstan::extract(output)
+
+### Group parameters: mu_p, sigma
+colnames(parameters$mu_p) <- c("alpha_pos","alpha_neg","beta")
+colnames(parameters$sigma) <- c("alpha_pos","alpha_neg","beta")
+
+mu_p <- parameters$mu_p %>% reshape2::melt() %>% rename(parameter=Var2)
+mu_p_HDI <- mu_p %>% group_by(parameter) %>% summarise(mean=mean(value),
+                                                       HDI1=HDIofMCMC(value)[1], 
+                                                       HDI2=HDIofMCMC(value)[2])
+
+sigma <- parameters$sigma %>% reshape2::melt() %>% rename(parameter=Var2)
+sigma_HDI <- sigma %>% group_by(parameter) %>% summarise(mean=mean(value),
+                                                         HDI1=HDIofMCMC(value)[1], 
+                                                         HDI2=HDIofMCMC(value)[2])
+
+
+### Individual parameters: alpha, beta
+colnames(parameters$alpha_pos) <- paste("subj",1:N, sep="")
+colnames(parameters$alpha_neg) <- paste("subj",1:N, sep="")
+colnames(parameters$beta) <- paste("subj",1:N, sep="")
+
+alpha_pos <- parameters$alpha_pos %>% reshape2::melt() %>% rename(subject=Var2)
+alpha_pos_HDI <- alpha_pos %>% group_by(subject) %>% summarise(mean=mean(value),
+                                                               sd  =sd(value),
+                                                               HDI1=HDIofMCMC(value)[1], 
+                                                               HDI2=HDIofMCMC(value)[2])
+
+alpha_neg <- parameters$alpha_neg %>% reshape2::melt() %>% rename(subject=Var2)
+alpha_neg_HDI <- alpha_neg %>% group_by(subject) %>% summarise(mean=mean(value),
+                                                               sd  =sd(value),
+                                                               HDI1=HDIofMCMC(value)[1], 
+                                                               HDI2=HDIofMCMC(value)[2])
+
+
+beta <- parameters$beta %>% reshape2::melt() %>% rename(subject=Var2)
+beta_HDI <- beta %>% group_by(subject) %>% summarise(mean=mean(value),
+                                                     sd  =sd(value),
+                                                     HDI1=HDIofMCMC(value)[1], 
+                                                     HDI2=HDIofMCMC(value)[2])
+
+set.seed(08826)
+true_pars = data.frame(alpha_pos = rnorm(N, 0.20, 0.08),
+                        alpha_neg = rnorm(N, 0.30, 0.10),
+                        beta = rnorm(N, 2.00, 0.70),
+                        subjID  = 1:N) 
+true_pars <- melt(true_pars, id="subjID")
+
+estm_pars <- data.frame(alpha_pos = alpha_pos_HDI$mean,
+                        alpha_neg = alpha_neg_HDI$mean,
+                        beta = beta_HDI$mean, 
+                        subjID = 1:N)
+estm_pars <- melt(estm_pars, id="subjID")
+estm_pars <- estm_pars %>% mutate(sd=c(alpha_pos_HDI$sd, alpha_neg_HDI$sd, 
+                                       beta_HDI$sd))
+
+pars_compare <- merge(true_pars, estm_pars, by=c("subjID","variable")) %>% 
+  arrange(variable, subjID) %>% rename(true=value.x, estm=value.y, parameter=variable)
+
+c4.2 <- ggplot(pars_compare, aes(x=true, y=estm)) + geom_point() + 
+  facet_wrap(~parameter, scales = "free") +
+  geom_abline(aes(intercept=0, slope=1, colour="red")) +
+  geom_errorbar(aes(ymin=estm-sd, ymax=estm+sd))
+
+
+save(c4.1, c4.2, g4_mu, g4_sigma, i4_alpha_pos, i4_alpha_neg, i4_beta, file="graph4.RData")

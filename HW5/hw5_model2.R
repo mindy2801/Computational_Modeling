@@ -52,41 +52,47 @@ library(reshape2)
 colnames(parameters$alpha) <- paste("subj",1:N, sep="")
 colnames(parameters$beta) <- paste("subj",1:N, sep="")
 
-alpha <- parameters$alpha %>% reshape2::melt() %>% rename(subject=Var2)
+alpha <- parameters$alpha %>% melt() %>% rename(subject=Var2)
 alpha_HDI <- alpha %>% group_by(subject) %>% summarise(mean=mean(value),
                                                        sd  =sd(value),
                                                        HDI1=HDIofMCMC(value)[1], 
                                                        HDI2=HDIofMCMC(value)[2])
 
-beta <- parameters$beta %>% reshape2::melt() %>% rename(subject=Var2)
+beta <- parameters$beta %>% melt() %>% rename(subject=Var2)
 beta_HDI <- beta %>% group_by(subject) %>% summarise(mean=mean(value),
                                                      sd  =sd(value),
                                                      HDI1=HDIofMCMC(value)[1], 
                                                      HDI2=HDIofMCMC(value)[2])
 
-i2_alpha <- ggplot(alpha, aes(value, fill=subject)) + geom_histogram(bins = 50) + 
-  facet_wrap(~subject, ncol=1) + 
-  geom_vline(data=alpha_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=alpha_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(), 
-        axis.title.x=element_blank(),
-        legend.position="none")
 
-i2_beta <- ggplot(beta, aes(value, fill=subject)) + geom_histogram(bins = 50) + 
-  facet_wrap(~subject, ncol=1) + 
-  geom_vline(data=beta_HDI, aes(xintercept=mean), 
-             linetype="dashed", size=1) +
-  geom_errorbarh(data=beta_HDI, aes(y=0, x=mean, xmin=HDI1, xmax=HDI2), 
-                 height=20, size=1) +
-  ylab(label="") +
-  theme(axis.text.y=element_blank(),  axis.ticks.y=element_blank(), 
-        axis.title.x=element_blank(),
-        legend.position="none")
+i2_alpha <- ggplot(alpha, aes(value)) + geom_density() + 
+  facet_wrap(~subject, ncol=6, scale="free_y") 
 
-multiplot(i2_alpha, i2_beta, cols=2)
+d <- ggplot_build(i2_alpha)$data[[1]] 
+d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
+  select(x,y,subject) %>% 
+  merge(alpha_HDI, by="subject") %>% group_by(subject) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+i2_alpha <-i2_alpha + geom_area(data = d, 
+                              aes(x=x, y=y), fill="#FF9999", colour="black", group="subject") + 
+  geom_vline(data=alpha_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
+i2_beta <- ggplot(beta, aes(value)) + geom_density() + 
+  facet_wrap(~subject, ncol=6, scales="free_y") 
+
+d <- ggplot_build(i2_beta)$data[[1]] 
+d <- d %>% mutate(subject=rep(paste("subj",1:N, sep=""), each=nrow(d)/N)) %>% 
+  select(x,y,subject) %>% 
+  merge(beta_HDI, by="subject") %>% group_by(subject) %>% 
+  filter(x <= HDI2 & x >= HDI1)
+
+i2_beta <-i2_beta + geom_area(data = d, 
+                            aes(x=x, y=y), fill="#FF9999", colour="black", group="subject") + 
+  geom_vline(data=beta_HDI, aes(xintercept=mean)) + 
+  xlab("") + theme_bw()
+
 
 ## 1.2b
 ### x: true parameters, y: estimated parameters and add 1sd error bars
@@ -110,3 +116,5 @@ c2 <- ggplot(pars_compare, aes(x=true, y=estm)) + geom_point() +
   geom_abline(aes(intercept=0, slope=1, colour="red")) +
   geom_errorbar(aes(ymin=estm-sd, ymax=estm+sd))
 
+
+save(c2,i2_alpha, i2_beta, file="graph2.RData")
