@@ -1,8 +1,10 @@
 ---
 title: "Homwork 5"
 author: "DY"
-date: "2018≥‚ 5ø˘ 21¿œ"
-output: html_document
+date: "2018<eb>ÖÑ 5<ec>õî 21<ec>ùº"
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -55,9 +57,9 @@ c2 + ggtitle("Scatterplot of true vs. estimated parameters with no hierarchy") +
 ```
 
 ##2.3.
-1. The estimated parameters with no hierarchy have values more closer to the true values than thoes with a hierarchy. The difference seems to come from the fact that true parameters of some subjects are quite extreme. Since there happens shrinkage effect within a hierarchical structure, the true extremeness would have been disappeared.
+1. The estimated parameters with no hierarchy have values more closer to the true values than thoes with a hierarchy. The difference seems to come from the fact that true parameters of some subjects are quite extreme. Since there happens shrinkage effect within a hierarchical structure, the true extremeness would have been diminished.
 
-2. Also, the error bars in the estimated parameters with no hierarchy are generally narrower than those with a hierarchy. It also causes from the shrinkage effect. By pulling an individual's extreme parameter to more moderate value, this certainly creates a gap between the collected data and the estimation, thus creating more errors in the hierarchical structure.
+2. Also, the error bars in the estimated parameters with no hierarchy are generally narrower than those with a hierarchy. By pulling an individual's extreme parameter to more moderate value, this certainly makes a gap between the collected data and the estimation, thus creating more errors in the hierarchical structure.
 
 #Q3. °∞Shrinkage°± in hierarchical Bayesian data analysis.
 ##3.1.Set num_subjs = 200, num_trials=100 and generate 200 fake subjects°Ø data. 
@@ -65,14 +67,19 @@ FILE: simul_data_hw5_model1.1.txt
 
 ##3.2.
 FILE: hw5_model1.1.R
+
 ```{r}
-g3_mu <- g3_mu + ggtitle("Group parameters: mu")
-g3_sigma <- g3_sigma + ggtitle("Group parameters: sigma")
+g3_mu <- g3_mu + ggtitle("Group parameters with more subj and trials : mu")
+g3_sigma <- g3_sigma + ggtitle("Group parameters with more subj and trials : sigma")
 
 multiplot(g3_mu, g3_sigma, cols=2)
 
-i3_alpha + ggtitle("Individual parameters: alpha")
-i3_beta + ggtitle("Individual parameters: beta")
+```
+
+```{r, fig.height = 10, fig.width = 10}
+
+i3_alpha + ggtitle("Individual parameters with more subj and trials : alpha")
+i3_beta + ggtitle("Individual parameters with more subj and trials : beta")
 ```
 
 ##3.3.
@@ -82,10 +89,12 @@ c3 + ggtitle("Scatterplot of true vs. estimated parameters") +
 ```
 
 ##3.4. Do you notice °∞shrinkage°± in one parameter but not so much in the other parameter? Can you explain why? 
-ANSWER: why partial shrinkage?
+The shrinkage effect is more obvious in the alpha. The reason why is that the true values of the alpha are more extreme in their range than those of beta. Therefore, the shinkage effect plays more role in the alpha.
 
 #Q4.Modify provided Stan and R codes so that we can allow two learning rates in the reinforcement learning model. 
 ##4.1. Find the posterior distribution of individual and group (hyper) parameters. 
+FILE: hw5_bonus.R, hw5_bonus.stan, simulate_hw5_bonus.R
+
 ```{r}
 g4_mu <- g4_mu + ggtitle("Group parameters: mu")
 g4_sigma <- g4_sigma + ggtitle("Group parameters: sigma")
@@ -111,5 +120,4 @@ c4.2 + ggtitle("Scatterplot of true vs. estimated parameters with option(0.3, 0.
 
 
 ##4.4. Do you notice any difference between what you found in (2) and (3)? Try to explain what made the difference.
-
-ANSWER
+The estimated parameters of (2) do not cover the true parameters very well than (3) does. The reason why is the shortage of enough trial numbers. By separating alphas into two different parameters by PE, the necessary number of trials would have been doubled. Thus, by increasing the trial numbers from 100 to 300, the estimated parameters are more appropriate in (3). 
